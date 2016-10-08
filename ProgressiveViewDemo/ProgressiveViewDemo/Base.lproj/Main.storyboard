@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11201" systemVersion="16B2333a" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <userGuides>
+                            <userLayoutGuide location="187" affinity="minX"/>
+                        </userGuides>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="feier.png" translatesAutoresizingMaskIntoConstraints="NO" id="taq-8X-KFd">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="250" id="9QR-yr-CIb"/>
+                                    <constraint firstAttribute="height" constant="320" id="tNb-0X-zTo"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="14Y-5f-I48">
+                                <state key="normal" title="上到下"/>
+                                <connections>
+                                    <action selector="topProgressive:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ONd-C8-gfk"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XKA-ju-fPn">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="Rnc-bp-smG"/>
+                                    <constraint firstAttribute="width" constant="75" id="jdb-Ea-Jvj"/>
+                                </constraints>
+                                <state key="normal" title="中间"/>
+                                <connections>
+                                    <action selector="centerProgressive:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Y0i-ge-tcj"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4iC-fB-ZaU">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="kBP-mp-nN2"/>
+                                    <constraint firstAttribute="width" constant="46" id="qgu-ww-xHD"/>
+                                </constraints>
+                                <state key="normal" title="左到右"/>
+                                <connections>
+                                    <action selector="leftProgressive:" destination="BYZ-38-t0r" eventType="touchUpInside" id="C5P-Kh-Td9"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Pf2-bN-CF0">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="31" id="Qu9-tp-4s1"/>
+                                    <constraint firstAttribute="height" constant="30" id="lZl-Qk-5G6"/>
+                                </constraints>
+                                <state key="normal" title="圆形"/>
+                                <connections>
+                                    <action selector="roundProgressive:" destination="BYZ-38-t0r" eventType="touchUpInside" id="aHG-RE-J2l"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AAF-i4-VVA">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="67" id="HlF-rp-SWt"/>
+                                    <constraint firstAttribute="height" constant="30" id="W4d-it-gqi"/>
+                                </constraints>
+                                <state key="normal" title="消失动画"/>
+                                <connections>
+                                    <action selector="hideProgressive:" destination="BYZ-38-t0r" eventType="touchUpInside" id="rNM-Sz-dRH"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="4iC-fB-ZaU" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" multiplier="0.6" id="6dt-eR-IcJ"/>
+                            <constraint firstItem="Pf2-bN-CF0" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" multiplier="0.85" id="7AS-2x-ns6"/>
+                            <constraint firstItem="Pf2-bN-CF0" firstAttribute="top" secondItem="4iC-fB-ZaU" secondAttribute="top" id="7hd-Fi-aXk"/>
+                            <constraint firstItem="XKA-ju-fPn" firstAttribute="width" secondItem="14Y-5f-I48" secondAttribute="width" id="Jbw-ge-t2a"/>
+                            <constraint firstItem="XKA-ju-fPn" firstAttribute="top" secondItem="14Y-5f-I48" secondAttribute="top" id="NAT-oH-Thf"/>
+                            <constraint firstItem="taq-8X-KFd" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="50" id="OZt-FQ-D2m"/>
+                            <constraint firstItem="AAF-i4-VVA" firstAttribute="top" secondItem="taq-8X-KFd" secondAttribute="bottom" constant="70" id="VMD-Xr-iKK"/>
+                            <constraint firstItem="14Y-5f-I48" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" multiplier="0.2" id="c3w-IG-b0L"/>
+                            <constraint firstItem="XKA-ju-fPn" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" multiplier="0.3" id="fdP-Tn-Q2n"/>
+                            <constraint firstItem="14Y-5f-I48" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="trailing" multiplier="0.05" id="gSE-rv-SCQ"/>
+                            <constraint firstItem="XKA-ju-fPn" firstAttribute="height" secondItem="14Y-5f-I48" secondAttribute="height" id="hdf-L1-xeE"/>
+                            <constraint firstItem="taq-8X-KFd" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="omJ-pr-D4O"/>
+                            <constraint firstItem="AAF-i4-VVA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="pNb-Ro-pAS"/>
+                            <constraint firstItem="14Y-5f-I48" firstAttribute="top" secondItem="taq-8X-KFd" secondAttribute="bottom" constant="30" id="r4H-kC-z0K"/>
+                            <constraint firstItem="4iC-fB-ZaU" firstAttribute="top" secondItem="XKA-ju-fPn" secondAttribute="top" id="rlh-g5-qU2"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="imageView" destination="taq-8X-KFd" id="5ud-iS-sTk"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="117.59999999999999" y="123.68815592203899"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="feier.png" width="423" height="510"/>
+    </resources>
+</document>
