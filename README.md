@@ -8,5 +8,8 @@
 ```
 and
 ```
-[_imageView showProgressiveWithDirection:ProgressiveDirectionRound];
+[_imageView hideProgressiveWithDirection:ProgressiveDirectionBottom complete:^{
+        NSLog(@"动画完成");
+        [_imageView removeFromSuperview];
+    }];
 ```
