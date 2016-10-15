@@ -11,6 +11,7 @@
 
 #define PROGRESSIVE_DEFAULT_DURATION 1.f
 
+// 渐进目的
 typedef NS_ENUM(NSInteger, ProgressivePurpose) {
     ProgressivePurposeShow,
     ProgressivePurposeHide,
@@ -19,20 +20,17 @@ typedef NS_ENUM(NSInteger, ProgressivePurpose) {
 
 typedef void(^Block)();
 
-static CGFloat staticHeight = 0;
-static const void *CADisplayLinkKey = &CADisplayLinkKey;
 static const void *BlockKey = &BlockKey;
 
-@interface UIView ()
+@interface UIView ()<CAAnimationDelegate>
 
-@property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, copy) Block completeBlock;
 /** 动画方向 */
 @property (nonatomic, assign) ProgressiveDirection direction;
 /** 是否在动画中 */
 @property (nonatomic, assign, readwrite, getter = isProgressAnimating) BOOL progressAnimating;
 /** 动画执行时间 */
-@property (nonatomic, assign) CGFloat duration;
+@property (nonatomic, assign) CFTimeInterval duration;
 
 @end
 
@@ -44,9 +42,7 @@ static const void *BlockKey = &BlockKey;
 }
 
 - (void)showProgressiveWithDirection:(ProgressiveDirection)direction {
-    [self prepareForAnimation:direction];
-    self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(showProgressiveAnimate)];
-    [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+    [self doProgressiveAnimateWithDirection:direction complete:nil purpose:ProgressivePurposeShow];
 }
 
 - (void)hideProgressiveWithDirection:(ProgressiveDirection)direction complete:(void (^)())completeBlock duration:(NSTimeInterval)duration {
@@ -55,22 +51,132 @@ static const void *BlockKey = &BlockKey;
 }
 
 - (void)hideProgressiveWithDirection:(ProgressiveDirection)direction complete:(void(^)())completeBlock {
+    [self doProgressiveAnimateWithDirection:direction complete:completeBlock purpose:ProgressivePurposeHide];
+}
+
+#pragma mark - 动画方法
+- (void)doProgressiveAnimateWithDirection:(ProgressiveDirection)direction complete:(void(^)())completeBlock purpose:(ProgressivePurpose)purpose {
     if (completeBlock) {
         self.completeBlock = completeBlock;
     }
-    [self prepareForAnimation:direction];
-    self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(hideProgressiveAnimate)];
-    [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
-}
-
-/*! @brief 动画前准备工作
- *
- * @param direction 方向
- */
-- (void)prepareForAnimation:(ProgressiveDirection)direction {
+    
+    if (self.duration == 0) {
+        self.duration = 1.f;
+    }
     self.direction = direction;
-    staticHeight = 0;
-    self.progressAnimating = YES;
+    
+    CGFloat width = self.frame.size.width;
+    CGFloat height = self.frame.size.height;
+    
+    UIBezierPath *startPath;     // 渐进开始路径
+    UIBezierPath *endPath;     // 渐进结束路径
+    // 遮罩layer
+    CAShapeLayer *shapeLayer = [CAShapeLayer layer];
+    shapeLayer.path = endPath.CGPath;
+    self.layer.mask = shapeLayer;
+    
+    if (self.direction == ProgressiveDirectionTop
+        || self.direction == ProgressiveDirectionVerticalCenter
+        || self.direction == ProgressiveDirectionBottom) {
+        switch (self.direction) {
+            case ProgressiveDirectionTop:
+            {
+                if (purpose == ProgressivePurposeShow) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, 0)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                } else if (purpose == ProgressivePurposeHide) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, height, width, 0)];
+                }
+            }
+                break;
+            case ProgressiveDirectionVerticalCenter:
+            {
+                if (purpose == ProgressivePurposeShow) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, height * 0.5, width, 0)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                } else if (purpose == ProgressivePurposeHide) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, height * 0.5, width, 0)];
+                }
+            }
+                break;
+            case ProgressiveDirectionBottom:
+            {
+                if (purpose == ProgressivePurposeShow) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, height, width, 0)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                } else if (purpose == ProgressivePurposeHide) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, 0)];
+                }
+            }
+                break;
+            default:
+                break;
+        }
+    }else if (self.direction == ProgressiveDirectionLeft
+              || self.direction == ProgressiveDirectionHorizontalCenter
+              || self.direction == ProgressiveDirectionRight) {
+        switch (self.direction) {
+            case ProgressiveDirectionLeft:
+            {
+                if (purpose == ProgressivePurposeShow) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, 0, height)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                } else if (purpose == ProgressivePurposeHide) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(width, 0, 0, height)];
+                }
+            }
+                break;
+            case ProgressiveDirectionHorizontalCenter:
+            {
+                if (purpose == ProgressivePurposeShow) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(width * 0.5, 0, 0, height)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                } else if (purpose == ProgressivePurposeHide) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(width * 0.5, 0, 0, height)];
+                }
+            }
+                break;
+            case ProgressiveDirectionRight:
+            {
+                if (purpose == ProgressivePurposeShow) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(width, 0, 0, height)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                } else if (purpose == ProgressivePurposeHide) {
+                    startPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height)];
+                    endPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, 0, height)];
+                }
+            }
+                break;
+            default:
+                break;
+        }
+    }else if (self.direction == ProgressiveDirectionRound) {
+        // 斜边长度
+        CGFloat diagonal = hypot(width / 2, height / 2);
+        
+        if (purpose == ProgressivePurposeShow) {
+            startPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(width / 2, height / 2) radius:1 startAngle:0 endAngle:M_PI * 2 clockwise:YES];
+            endPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(width / 2, height / 2) radius:diagonal startAngle:0 endAngle:M_PI * 2 clockwise:YES];
+        } else if (purpose == ProgressivePurposeHide) {
+            startPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(width / 2, height / 2) radius:diagonal startAngle:0 endAngle:M_PI * 2 clockwise:YES];
+            endPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(width / 2, height / 2) radius:1 startAngle:0 endAngle:M_PI * 2 clockwise:YES];
+        }
+    }
+    
+    shapeLayer.path = endPath.CGPath;
+    
+    CABasicAnimation *progressAnimation = [CABasicAnimation animationWithKeyPath:@"path"];
+    progressAnimation.duration = self.duration;
+    progressAnimation.fromValue = (__bridge id _Nullable)(startPath.CGPath);
+    progressAnimation.toValue = (__bridge id _Nullable)(endPath.CGPath);
+    progressAnimation.delegate = self;
+    [progressAnimation setValue:@(purpose) forKeyPath:@"purpose"];
+    [shapeLayer addAnimation:progressAnimation forKey:nil];
 }
 
 /*! @brief 动画结束处理
@@ -78,11 +184,6 @@ static const void *BlockKey = &BlockKey;
  * @param purpose 动画类型
  */
 - (void)handleComplete:(ProgressivePurpose)purpose {
-    [self.displayLink invalidate];
-    self.displayLink = nil;
-    self.progressAnimating = NO;
-    self.duration = 0;
-    
     switch (purpose) {
         case ProgressivePurposeShow:
             break;
@@ -101,188 +202,19 @@ static const void *BlockKey = &BlockKey;
     }
 }
 
-#pragma mark - 动画过程
-- (void)hideProgressiveAnimate {
-    self.hidden = NO;
-    
-    CGFloat width = self.frame.size.width;
-    CGFloat height = self.frame.size.height;
-    CGFloat numberOfFPS = (60 * (self.duration > 0.01 ? self.duration : PROGRESSIVE_DEFAULT_DURATION));
-    UIBezierPath *bezierPath;
-    
-    if (self.direction == ProgressiveDirectionTop
-        || self.direction == ProgressiveDirectionVerticalCenter
-        || self.direction == ProgressiveDirectionBottom) {
-        staticHeight += height / numberOfFPS;
-        switch (self.direction) {
-            case ProgressiveDirectionTop:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, staticHeight, width, height - staticHeight)];
-            }
-                break;
-            case ProgressiveDirectionVerticalCenter:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height / 2 - staticHeight / 2)];
-                [bezierPath moveToPoint:(CGPoint){0, height / 2 + staticHeight / 2}];
-                [bezierPath addLineToPoint:(CGPoint){width, height / 2 + staticHeight / 2}];
-                [bezierPath addLineToPoint:(CGPoint){width, height}];
-                [bezierPath addLineToPoint:(CGPoint){0, height}];
-                [bezierPath closePath];
-            }
-                break;
-            case ProgressiveDirectionBottom:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, height - staticHeight)];
-            }
-                break;
-            default:
-                break;
-        }
-        
-        if (staticHeight > height) {
-            [self handleComplete:ProgressivePurposeHide];
-        }
-    }else if (self.direction == ProgressiveDirectionLeft
-              || self.direction == ProgressiveDirectionHorizontalCenter
-              || self.direction == ProgressiveDirectionRight) {
-        staticHeight += width / numberOfFPS;
-        switch (self.direction) {
-            case ProgressiveDirectionLeft:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(staticHeight, 0, width - staticHeight, height)];
-            }
-                break;
-            case ProgressiveDirectionHorizontalCenter:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width / 2 - staticHeight / 2, height)];
-                [bezierPath moveToPoint:(CGPoint){width / 2 + staticHeight / 2, 0}];
-                [bezierPath addLineToPoint:(CGPoint){width / 2 + staticHeight / 2, height}];
-                [bezierPath addLineToPoint:(CGPoint){width, height}];
-                [bezierPath addLineToPoint:(CGPoint){width, 0}];
-                [bezierPath closePath];
-            }
-                break;
-            case ProgressiveDirectionRight:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width - staticHeight, height)];
-            }
-                break;
-            default:
-                break;
-        }
-        
-        if (staticHeight > width) {
-            [self handleComplete:ProgressivePurposeHide];
-        }
-    }else if (self.direction == ProgressiveDirectionRoundConstrict) {
-        // 斜边长度
-        CGFloat diagonal = hypot(width / 2, height / 2);
-        staticHeight += diagonal / numberOfFPS;
-        bezierPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(width / 2, height / 2) radius:MAX(0, diagonal - staticHeight) startAngle:0 endAngle:M_PI * 2 clockwise:1];
-        
-        if (staticHeight > diagonal) {
-            [self handleComplete:ProgressivePurposeHide];
-        }
-    }
-    
-    if (bezierPath) {
-        CAShapeLayer *shapeLayer = [CAShapeLayer layer];
-        shapeLayer.path = bezierPath.CGPath;
-        self.layer.mask = shapeLayer;
-    }
+#pragma mark - CAAnimationDelegate代理方法
+- (void)animationDidStart:(CAAnimation *)anim {
+    self.progressAnimating = YES;
 }
 
-- (void)showProgressiveAnimate {
-    self.hidden = NO;
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+    self.progressAnimating = NO;
     
-    CGFloat width = self.frame.size.width;
-    CGFloat height = self.frame.size.height;
-    CGFloat numberOfFPS = (60 * (self.duration > 0.01 ? self.duration : PROGRESSIVE_DEFAULT_DURATION));
-    UIBezierPath *bezierPath;
-    
-    // 方向
-    if (self.direction == ProgressiveDirectionTop
-        || self.direction == ProgressiveDirectionVerticalCenter
-        || self.direction == ProgressiveDirectionBottom) {
-        staticHeight += height / numberOfFPS;
-        switch (self.direction) {
-            case ProgressiveDirectionTop:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, width, staticHeight)];
-            }
-                break;
-            case ProgressiveDirectionVerticalCenter:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, height / 2 - staticHeight / 2, width, staticHeight)];
-            }
-                break;
-            case ProgressiveDirectionBottom:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, height - staticHeight, width, staticHeight)];
-            }
-                break;
-            default:
-                break;
-        }
-        
-        if (staticHeight > height) {
-            [self handleComplete:ProgressivePurposeShow];
-        }
-    }else if (self.direction == ProgressiveDirectionLeft
-              || self.direction == ProgressiveDirectionHorizontalCenter
-              || self.direction == ProgressiveDirectionRight) {
-        staticHeight += width / numberOfFPS;
-        switch (self.direction) {
-            case ProgressiveDirectionLeft:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, staticHeight, height)];
-            }
-                break;
-            case ProgressiveDirectionHorizontalCenter:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(width / 2 - staticHeight / 2, 0, staticHeight, height)];
-            }
-                break;
-            case ProgressiveDirectionRight:
-            {
-                bezierPath = [UIBezierPath bezierPathWithRect:CGRectMake(width - staticHeight, 0, staticHeight, height)];
-            }
-                break;
-            default:
-                break;
-        }
-        
-        if (staticHeight > width) {
-            [self handleComplete:ProgressivePurposeShow];
-        }
-    }else if (self.direction == ProgressiveDirectionRoundSpread) {
-        // 斜边长度
-        CGFloat diagonal = hypot(width / 2, height / 2);
-        staticHeight += diagonal / numberOfFPS;
-        
-        bezierPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(width / 2, height / 2) radius:staticHeight startAngle:0 endAngle:M_PI * 2 clockwise:1];
-        
-        if (staticHeight > diagonal) {
-            [self handleComplete:ProgressivePurposeShow];
-        }
-    }
-    
-    if (bezierPath) {
-        CAShapeLayer *shapeLayer = [CAShapeLayer layer];
-        shapeLayer.path = bezierPath.CGPath;
-        self.layer.mask = shapeLayer;
-    }
+    [self handleComplete:[[anim valueForKeyPath:@"purpose"] integerValue]];
 }
+
 
 #pragma mark - setter/getter方法
-- (CADisplayLink *)displayLink {
-    return objc_getAssociatedObject(self, CADisplayLinkKey);
-}
-
-- (void)setDisplayLink:(CADisplayLink *)displayLink {
-    objc_setAssociatedObject(self, CADisplayLinkKey, displayLink, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
 - (ProgressiveDirection)direction {
     return [objc_getAssociatedObject(self, _cmd) integerValue];
 }

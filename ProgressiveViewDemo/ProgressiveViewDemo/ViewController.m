@@ -31,11 +31,11 @@
 }
 
 - (IBAction)leftProgressive:(id)sender {
-    [_imageView showProgressiveWithDirection:ProgressiveDirectionLeft];
+    [_imageView showProgressiveWithDirection:ProgressiveDirectionRight];
 }
 
 - (IBAction)roundProgressive:(id)sender {
-    [_imageView showProgressiveWithDirection:ProgressiveDirectionRoundSpread];
+    [_imageView showProgressiveWithDirection:ProgressiveDirectionRound];
 }
 
 - (IBAction)hideProgressive:(id)sender {

@@ -10,14 +10,14 @@
 
 /** 动画方向 */
 typedef NS_ENUM(NSInteger, ProgressiveDirection) {
-    ProgressiveDirectionTop,
-    ProgressiveDirectionVerticalCenter,
-    ProgressiveDirectionBottom,
-    ProgressiveDirectionLeft,
-    ProgressiveDirectionHorizontalCenter,
-    ProgressiveDirectionRight,
-    ProgressiveDirectionRoundSpread,        // 出现动画中使用
-    ProgressiveDirectionRoundConstrict      // 消失动画中使用
+    ProgressiveDirectionTop,                // 从上到下
+    ProgressiveDirectionVerticalCenter,     // 从中间到两端（垂直）
+    ProgressiveDirectionBottom,             // 从下到上
+    ProgressiveDirectionLeft,               // 从左到右
+    ProgressiveDirectionHorizontalCenter,   // 从中间到两端（水平）
+    ProgressiveDirectionRight,              // 从右到左
+    ProgressiveDirectionRound,              // 圆形扩散
+//    ProgressiveDirectionRoundConstrict      // 圆形扩散（消失动画中使用）
 };
 
 @interface UIView (Progressive)
